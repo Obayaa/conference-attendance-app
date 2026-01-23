@@ -157,9 +157,9 @@ export default function AdminPage({ onLogout }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-100 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-indigo-50 to-blue-100 flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
+          <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600 text-lg">Loading dashboard...</p>
         </div>
       </div>
@@ -167,13 +167,13 @@ export default function AdminPage({ onLogout }) {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-100 p-4 md:p-8">
+    <div className="bg-linear-to-br from-indigo-50 to-blue-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+        <div className="bg-white rounded-md shadow-sm p-6 md:p-8 mb-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <TrendingUp className="w-8 h-8 text-purple-600" />
+              <TrendingUp className="w-8 h-8 text-indigo-600" />
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">
                   Admin Dashboard
@@ -188,7 +188,7 @@ export default function AdminPage({ onLogout }) {
               <button
                 onClick={loadData}
                 disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition disabled:opacity-50"
               >
                 <RefreshCw
                   className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
@@ -223,12 +223,12 @@ export default function AdminPage({ onLogout }) {
               <div className="text-green-100">Total Attended</div>
             </div>
 
-            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+            <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
               <Percent className="w-8 h-8 mb-3 opacity-80" />
               <div className="text-4xl font-bold mb-1">
                 {stats.attendanceRate}%
               </div>
-              <div className="text-purple-100">Attendance Rate</div>
+              <div className="text-indigo-100">Attendance Rate</div>
             </div>
 
             <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-lg">
@@ -265,7 +265,7 @@ export default function AdminPage({ onLogout }) {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                            className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -303,7 +303,7 @@ export default function AdminPage({ onLogout }) {
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
-                              className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                              className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -337,7 +337,7 @@ export default function AdminPage({ onLogout }) {
         </div>
 
         {/* Attendees Table */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <div className="bg-white rounded-md shadow-md p-6 md:p-8">
           <h3 className="text-2xl font-bold text-gray-800 mb-6">
             Recent Attendees ({attendance.length})
           </h3>
@@ -381,7 +381,7 @@ export default function AdminPage({ onLogout }) {
                   {attendance.map((record, index) => (
                     <tr
                       key={record.id || index}
-                      className="border-b border-gray-100 hover:bg-purple-50 transition"
+                      className="border-b border-gray-100 hover:bg-indigo-50 transition"
                     >
                       <td className="py-3 px-4">
                         <div className="text-sm font-medium text-gray-800">
