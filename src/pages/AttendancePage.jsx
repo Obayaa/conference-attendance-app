@@ -14,13 +14,13 @@ export default function AttendancePage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [searching, setSearching] = useState(false);
-  
+
   const [activeMember, setActiveMember] = useState(null);
   const [isProxy, setIsProxy] = useState(false);
   const [proxyName, setProxyName] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [todayCount, setTodayCount] = useState(0);
-  
+
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -108,8 +108,8 @@ export default function AttendancePage() {
       setActiveMember(null);
       setIsProxy(false);
       setProxyName("");
-      setTodayCount(prev => prev + 1);
-      
+      setTodayCount((prev) => prev + 1);
+
       // Auto-clear success message after 3 seconds
       setTimeout(() => {
         setMessage({ text: "", type: "" });
@@ -159,159 +159,176 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto"> 
-        <div className="bg-white rounded-md shadow-md p-6 md:p-8 mb-4">
-          <div className="flex items-center gap-3 mb-4">
-            <UserCheck className="w-6 h-6 text-indigo-600" />
-            <h2 className="text-xl font-bold text-gray-800">Mark Attendance</h2>
-          </div>
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white rounded-md shadow-md p-6 md:p-8 mb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <UserCheck className="w-6 h-6 text-indigo-600" />
+          <h2 className="text-xl font-bold text-gray-800">Mark Attendance</h2>
+        </div>
 
-          {/* Autocomplete Search Input */}
-          <div className="mb-4 relative">
-            <div className="relative" ref={inputRef}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                placeholder="Search by Customer ID, Name, or Phone..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => results.length > 0 && setShowDropdown(true)}
-                className="w-full text-sm pl-12 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                autoComplete="off"
-              />
-              {searching && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="animate-spin h-4 w-4 border-2 border-indigo-600 rounded-full border-t-transparent"></div>
-                </div>
-              )}
-              {query && !searching && (
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-
-            {/* Dropdown Results */}
-            {showDropdown && results.length > 0 && (
-              <div
-                ref={dropdownRef}
-                className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto"
-              >
-                {results.map((member, idx) => (
-                  <button
-                    key={member.custid}
-                    onClick={() => handleSelectMember(member)}
-                    onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`w-full text-left px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-indigo-50 transition ${
-                      selectedIndex === idx ? "bg-indigo-50" : ""
-                    }`}
-                  >
-                    <div className="font-semibold text-gray-800">{member.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      <span className="font-medium text-indigo-600">{member.custid}</span> • {member.phone} • {member.branch}
-                    </div>
-                  </button>
-                ))}
+        {/* Autocomplete Search Input */}
+        <div className="mb-4 relative">
+          <div className="relative" ref={inputRef}>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              placeholder="Search by Customer ID, Name, or Phone..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => results.length > 0 && setShowDropdown(true)}
+              className="w-full text-sm pl-12 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+              autoComplete="off"
+            />
+            {searching && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="animate-spin h-4 w-4 border-2 border-indigo-600 rounded-full border-t-transparent"></div>
               </div>
             )}
-
-            {/* No results message */}
-            {showDropdown && query && results.length === 0 && !searching && (
-              <div
-                ref={dropdownRef}
-                className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500"
+            {query && !searching && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                No members found starting with "{query}"
-              </div>
+                <X className="w-5 h-5" />
+              </button>
             )}
           </div>
 
-          {/* Message Display */}
-          {message.text && (
+          {/* Dropdown Results */}
+          {showDropdown && results.length > 0 && (
             <div
-              className={`p-4 rounded-lg mb-6 ${
-                message.type === "success"
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
-              }`}
+              ref={dropdownRef}
+              className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto"
             >
-              {message.text}
+              {results.map((member, idx) => (
+                <button
+                  key={member.custid}
+                  onClick={() => handleSelectMember(member)}
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                  className={`w-full text-left px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-indigo-50 transition ${
+                    selectedIndex === idx ? "bg-indigo-50" : ""
+                  }`}
+                >
+                  <div className="font-semibold text-gray-800">
+                    {member.name}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    <span className="font-medium text-indigo-600">
+                      {member.custid}
+                    </span>{" "}
+                    • {member.phone} • {member.branch}
+                  </div>
+                </button>
+              ))}
             </div>
           )}
 
-          {/* Confirmation Panel */}
-          {activeMember && (
-            <div className="border-2 border-indigo-300 rounded-lg p-6 bg-indigo-50 animate-fadeIn">
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Attendance</h3>
-              <div className="bg-white rounded-lg p-4 mb-4">
-                <div className="font-bold text-lg text-gray-800">{activeMember.name}</div>
-                <div className="text-sm text-gray-600 mt-1">
-                  <span className="font-semibold">ID:</span> {activeMember.custid} •{" "}
-                  <span className="font-semibold">Phone:</span> {activeMember.phone}
-                </div>
-                <div className="text-sm text-gray-600">
-                  <span className="font-semibold">Branch:</span> {activeMember.branch} •{" "}
-                  <span className="font-semibold">Gender:</span> {activeMember.gender}
-                </div>
-              </div>
+          {/* No results message */}
+          {showDropdown && query && results.length === 0 && !searching && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500"
+            >
+              No members found starting with "{query}"
+            </div>
+          )}
+        </div>
 
-              <label className="flex items-center gap-3 mb-4 cursor-pointer">
+        {/* Message Display */}
+        {message.text && (
+          <div
+            className={`p-4 rounded-lg mb-6 ${
+              message.type === "success"
+                ? "bg-green-50 text-green-700 border border-green-200"
+                : "bg-red-50 text-red-700 border border-red-200"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
+        {/* Confirmation Panel */}
+        {activeMember && (
+          <div className="border-2 border-indigo-300 rounded-lg p-6 bg-indigo-50 animate-fadeIn">
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Confirm Attendance
+            </h3>
+            <div className="bg-white rounded-lg p-4 mb-4">
+              <div className="font-bold text-lg text-gray-800">
+                {activeMember.name}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                <span className="font-semibold">ID:</span> {activeMember.custid}{" "}
+                • <span className="font-semibold">Phone:</span>{" "}
+                {activeMember.phone}
+              </div>
+              <div className="text-sm text-gray-600">
+                <span className="font-semibold">Branch:</span>{" "}
+                {activeMember.branch} •{" "}
+                <span className="font-semibold">Gender:</span>{" "}
+                {activeMember.gender}
+              </div>
+            </div>
+
+            <label className="flex items-center gap-3 mb-4 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isProxy}
+                onChange={(e) => setIsProxy(e.target.checked)}
+                className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 font-medium">
+                Attending as a proxy
+              </span>
+            </label>
+
+            {isProxy && (
+              <div className="mb-4">
                 <input
-                  type="checkbox"
-                  checked={isProxy}
-                  onChange={(e) => setIsProxy(e.target.checked)}
-                  className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter proxy person's full name"
+                  value={proxyName}
+                  onChange={(e) => setProxyName(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                 />
-                <span className="text-gray-700 font-medium">Attending as a proxy</span>
-              </label>
-
-              {isProxy && (
-                <div className="mb-4">
-                  <input
-                    placeholder="Enter proxy person's full name"
-                    value={proxyName}
-                    onChange={(e) => setProxyName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                  />
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <button
-                  onClick={confirmAttendance}
-                  disabled={isProxy && !proxyName.trim()}
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  Confirm Attendance
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveMember(null);
-                    setIsProxy(false);
-                    setProxyName("");
-                  }}
-                  className="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500 transition"
-                >
-                  Cancel
-                </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Stats */}
-          <div className="mt-6 p-4 bg-linear-to-r from-indigo-50 to-blue-50 rounded-lg">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">{todayCount}</div>
-              <div className="text-sm text-gray-600 mt-1">Marked in This Session</div>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmAttendance}
+                disabled={isProxy && !proxyName.trim()}
+                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                Confirm Attendance
+              </button>
+              <button
+                onClick={() => {
+                  setActiveMember(null);
+                  setIsProxy(false);
+                  setProxyName("");
+                }}
+                className="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="mt-6 p-4 bg-linear-to-r from-indigo-50 to-blue-50 rounded-lg">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-indigo-600">
+              {todayCount}
+            </div>
+            <div className="text-sm text-gray-600 mt-1">
+              Marked in This Session
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Quick Instructions
+      {/* Quick Instructions
         <div className="bg-white rounded-lg shadow-md p-4">
           <h4 className="font-semibold text-gray-700 mb-2">Quick Tips:</h4>
           <ul className="text-sm text-gray-600 space-y-1">
@@ -321,7 +338,6 @@ export default function AttendancePage() {
             <li>• All changes sync across devices in real-time</li>
           </ul>
         </div> */}
-      </div>
     </div>
   );
 }
