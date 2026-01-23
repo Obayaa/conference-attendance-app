@@ -32,11 +32,8 @@ export default function LoginScreen({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="flex items-center justify-center mb-6">
-          <LogIn className="w-12 h-12 text-indigo-600" />
-        </div>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Admin Login
         </h2>
