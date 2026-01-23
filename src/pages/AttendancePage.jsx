@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Search, UserCheck, X } from "lucide-react";
 
 // Import Supabase functions
@@ -39,7 +39,7 @@ export default function AttendancePage() {
     const handler = setTimeout(async () => {
       const found = await searchMembers(q);
       setResults(found);
-      setShowDropdown(found.length > 0);
+      setShowDropdown(true);
       setSelectedIndex(-1);
       setSearching(false);
     }, 300);
