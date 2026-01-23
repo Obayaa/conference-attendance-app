@@ -173,13 +173,13 @@ export default function AdminPage({ onLogout }) {
         <div className="bg-white rounded-md shadow-sm p-6 md:p-8 mb-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <TrendingUp className="w-8 h-8 text-indigo-600" />
+              <TrendingUp className="w-6 h-6 text-indigo-600" />
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">
+                <h2 className="text-2xl font-bold text-gray-800">
                   Admin Dashboard
                 </h2>
                 <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-3 h-3" />
                   Last updated: {lastUpdate.toLocaleTimeString()}
                 </div>
               </div>
@@ -206,34 +206,34 @@ export default function AdminPage({ onLogout }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-              <Users className="w-8 h-8 mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">
+              <Users className="w-6 h-6 mb-3 opacity-80" />
+              <div className="text-3xl font-bold mb-1">
                 {stats.totalMembers.toLocaleString()}
               </div>
               <div className="text-blue-100">Total Registered</div>
             </div>
 
             <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
-              <UserCheck className="w-8 h-8 mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">
+              <UserCheck className="w-6 h-6 mb-3 opacity-80" />
+              <div className="text-3xl font-bold mb-1">
                 {stats.totalAttended.toLocaleString()}
               </div>
               <div className="text-green-100">Total Attended</div>
             </div>
 
             <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
-              <Percent className="w-8 h-8 mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">
+              <Percent className="w-6 h-6 mb-3 opacity-80" />
+              <div className="text-3xl font-bold mb-1">
                 {stats.attendanceRate}%
               </div>
               <div className="text-indigo-100">Attendance Rate</div>
             </div>
 
             <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-lg">
-              <Activity className="w-8 h-8 mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">{stats.proxyCount}</div>
+              <Activity className="w-6 h-6 mb-3 opacity-80" />
+              <div className="text-3xl font-bold mb-1">{stats.proxyCount}</div>
               <div className="text-amber-100">Proxies</div>
             </div>
           </div>
