@@ -160,29 +160,29 @@ export default function AttendancePage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCheck className="w-8 h-8 text-indigo-600" />
-            <h2 className="text-2xl font-bold text-gray-800">Mark Attendance</h2>
+      <div className="max-w-3xl mx-auto"> 
+        <div className="bg-white rounded-md shadow-md p-6 md:p-8 mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <UserCheck className="w-6 h-6 text-indigo-600" />
+            <h2 className="text-xl font-bold text-gray-800">Mark Attendance</h2>
           </div>
 
           {/* Autocomplete Search Input */}
-          <div className="mb-6 relative">
+          <div className="mb-4 relative">
             <div className="relative" ref={inputRef}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 placeholder="Search by Customer ID, Name, or Phone..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onFocus={() => results.length > 0 && setShowDropdown(true)}
-                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                className="w-full text-sm pl-12 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                 autoComplete="off"
               />
               {searching && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="animate-spin h-5 w-5 border-2 border-indigo-600 rounded-full border-t-transparent"></div>
+                  <div className="animate-spin h-4 w-4 border-2 border-indigo-600 rounded-full border-t-transparent"></div>
                 </div>
               )}
               {query && !searching && (
