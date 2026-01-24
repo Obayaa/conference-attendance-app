@@ -312,7 +312,7 @@ The system is designed to handle:
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `VITE_SUPABASE_URL` | Your Supabase project URL | `https://xxx.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJhbGc...` |
+| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase anonymous key | `eyJhbGc...` |
 
 ### Customization Options
 
@@ -356,7 +356,7 @@ Generates optimized static files in `/dist` folder.
 
 3. **Environment variables**
    - Add `VITE_SUPABASE_URL`
-   - Add `VITE_SUPABASE_ANON_KEY`
+   - Add `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
 
 4. **Deploy**
    - Netlify auto-deploys on git push
@@ -501,22 +501,6 @@ Planned features for future versions:
 - [ ] **Role-Based Access** - Different admin permission levels
 - [ ] **Offline Mode** - Work without internet, sync later
 - [ ] **Print Badges** - Generate printable name tags
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👥 Support
-
-For questions, issues, or feature requests:
-
-- **Documentation:** See `/docs` folder
-- **Issues:** Create a GitHub issue
-- **Email:** support@yourorganization.com
 
 ---
 
