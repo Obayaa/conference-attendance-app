@@ -167,97 +167,135 @@ export default function AdminPage({ onLogout }) {
   }
 
   return (
-    <div className="bg-linear-to-br from-indigo-50 to-blue-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-md shadow-sm p-6 md:p-8 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="w-6 h-6 text-indigo-600" />
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Admin Dashboard
-                </h2>
-                <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                  <Clock className="w-3 h-3" />
-                  Last updated: {lastUpdate.toLocaleTimeString()}
-                </div>
+    // <div className="bg-linear-to-br from-indigo-50 to-blue-100 p-4 md:p-8">
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="bg-white rounded-md shadow-sm p-6 md:p-8 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="w-10 h-10 bg-indigo-600 text-white p-2 rounded-full" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Admin Dashboard
+              </h2>
+              <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                <Clock className="w-3 h-3" />
+                Last updated: {lastUpdate.toLocaleTimeString()}
               </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={loadData}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition disabled:opacity-50"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
-                />
-                Refresh
-              </button>
-              <button
-                onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
             </div>
           </div>
+          <div className="flex gap-3">
+            <button
+              onClick={loadData}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </button>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
+        </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-              <Users className="w-6 h-6 mb-3 opacity-80" />
-              <div className="text-3xl font-bold mb-1">
-                {stats.totalMembers.toLocaleString()}
-              </div>
-              <div className="text-blue-100">Total Registered</div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <Users className="w-6 h-6 mb-3 opacity-80" />
+            <div className="text-3xl font-bold mb-1">
+              {stats.totalMembers.toLocaleString()}
             </div>
-
-            <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
-              <UserCheck className="w-6 h-6 mb-3 opacity-80" />
-              <div className="text-3xl font-bold mb-1">
-                {stats.totalAttended.toLocaleString()}
-              </div>
-              <div className="text-green-100">Total Attended</div>
-            </div>
-
-            <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
-              <Percent className="w-6 h-6 mb-3 opacity-80" />
-              <div className="text-3xl font-bold mb-1">
-                {stats.attendanceRate}%
-              </div>
-              <div className="text-indigo-100">Attendance Rate</div>
-            </div>
-
-            <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-lg">
-              <Activity className="w-6 h-6 mb-3 opacity-80" />
-              <div className="text-3xl font-bold mb-1">{stats.proxyCount}</div>
-              <div className="text-amber-100">Proxies</div>
-            </div>
+            <div className="text-blue-100">Total Registered</div>
           </div>
 
-          {/* Breakdown Charts */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                Gender Breakdown
-              </h3>
-              {Object.entries(stats.genderCounts).length === 0 ? (
-                <p className="text-gray-500">No data yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {Object.entries(stats.genderCounts).map(([gender, count]) => {
+          <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+            <UserCheck className="w-6 h-6 mb-3 opacity-80" />
+            <div className="text-3xl font-bold mb-1">
+              {stats.totalAttended.toLocaleString()}
+            </div>
+            <div className="text-green-100">Total Attended</div>
+          </div>
+
+          <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
+            <Percent className="w-6 h-6 mb-3 opacity-80" />
+            <div className="text-3xl font-bold mb-1">
+              {stats.attendanceRate}%
+            </div>
+            <div className="text-indigo-100">Attendance Rate</div>
+          </div>
+
+          <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-lg">
+            <Activity className="w-6 h-6 mb-3 opacity-80" />
+            <div className="text-3xl font-bold mb-1">{stats.proxyCount}</div>
+            <div className="text-amber-100">Proxies</div>
+          </div>
+        </div>
+
+        {/* Breakdown Charts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              Gender Breakdown
+            </h3>
+            {Object.entries(stats.genderCounts).length === 0 ? (
+              <p className="text-gray-500">No data yet</p>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(stats.genderCounts).map(([gender, count]) => {
+                  const percentage =
+                    stats.totalAttended > 0
+                      ? ((count / stats.totalAttended) * 100).toFixed(1)
+                      : 0;
+                  return (
+                    <div key={gender}>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-700">
+                          {gender}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          {count} ({percentage}%)
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-gray-50 rounded-xl p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              Branch Breakdown
+            </h3>
+            {Object.entries(stats.branchCounts).length === 0 ? (
+              <p className="text-gray-500">No data yet</p>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(stats.branchCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([branch, count]) => {
                     const percentage =
                       stats.totalAttended > 0
                         ? ((count / stats.totalAttended) * 100).toFixed(1)
                         : 0;
                     return (
-                      <div key={gender}>
+                      <div key={branch}>
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-semibold text-gray-700">
-                            {gender}
+                            {branch}
                           </span>
                           <span className="text-sm text-gray-600">
                             {count} ({percentage}%)
@@ -272,164 +310,121 @@ export default function AdminPage({ onLogout }) {
                       </div>
                     );
                   })}
-                </div>
-              )}
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                Branch Breakdown
-              </h3>
-              {Object.entries(stats.branchCounts).length === 0 ? (
-                <p className="text-gray-500">No data yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {Object.entries(stats.branchCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([branch, count]) => {
-                      const percentage =
-                        stats.totalAttended > 0
-                          ? ((count / stats.totalAttended) * 100).toFixed(1)
-                          : 0;
-                      return (
-                        <div key={branch}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="font-semibold text-gray-700">
-                              {branch}
-                            </span>
-                            <span className="text-sm text-gray-600">
-                              {count} ({percentage}%)
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={downloadCSV}
-              disabled={attendance.length === 0}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Download className="w-5 h-5" />
-              Export CSV ({attendance.length} records)
-            </button>
-            <button
-              onClick={() => setShowClearModal(true)}
-              disabled={attendance.length === 0}
-              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Trash2 className="w-5 h-5" />
-              Clear All Attendance
-            </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Attendees Table */}
-        <div className="bg-white rounded-md shadow-md p-6 md:p-8">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">
-            Recent Attendees ({attendance.length})
-          </h3>
-          {attendance.length === 0 ? (
-            <div className="text-center py-12">
-              <UserCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No attendees yet</p>
-              <p className="text-gray-400 text-sm mt-2">
-                Attendance records will appear here in real-time
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Time
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Customer ID
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Phone
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Branch
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Gender
-                    </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                      Proxy
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {attendance.map((record, index) => (
-                    <tr
-                      key={record.id || index}
-                      className="border-b border-gray-100 hover:bg-indigo-50 transition"
-                    >
-                      <td className="py-3 px-4">
-                        <div className="text-sm font-medium text-gray-800">
-                          {formatTime(record.attended_at)}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {formatDate(record.attended_at)}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-semibold text-gray-800">
-                        {record.name}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600 font-mono text-sm">
-                        {record.custid}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">
-                        {record.phone}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">
-                        {record.branch}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            record.gender === "Male"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-pink-100 text-pink-700"
-                          }`}
-                        >
-                          {record.gender}
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={downloadCSV}
+            disabled={attendance.length === 0}
+            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-5 h-5" />
+            Export CSV ({attendance.length} records)
+          </button>
+          <button
+            onClick={() => setShowClearModal(true)}
+            disabled={attendance.length === 0}
+            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="w-5 h-5" />
+            Clear All Attendance
+          </button>
+        </div>
+      </div>
+
+      {/* Attendees Table */}
+      <div className="bg-white rounded-md shadow-md p-6 md:p-8">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">
+          Recent Attendees ({attendance.length})
+        </h3>
+        {attendance.length === 0 ? (
+          <div className="text-center py-12">
+            <UserCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No attendees yet</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Attendance records will appear here in real-time
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Time
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Name
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Customer ID
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Phone
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Branch
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Gender
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Proxy
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendance.map((record, index) => (
+                  <tr
+                    key={record.id || index}
+                    className="border-b border-gray-100 hover:bg-indigo-50 transition"
+                  >
+                    <td className="py-3 px-4">
+                      <div className="text-sm font-medium text-gray-800">
+                        {formatTime(record.attended_at)}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {formatDate(record.attended_at)}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-gray-800">
+                      {record.name}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 font-mono text-sm">
+                      {record.custid}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">{record.phone}</td>
+                    <td className="py-3 px-4 text-gray-600">{record.branch}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          record.gender === "Male"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-pink-100 text-pink-700"
+                        }`}
+                      >
+                        {record.gender}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {record.proxy ? (
+                        <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+                          {record.proxy_name}
                         </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {record.proxy ? (
-                          <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-                            {record.proxy_name}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
       <ConfirmModal
         open={showClearModal}
@@ -441,5 +436,7 @@ export default function AdminPage({ onLogout }) {
         onConfirm={handleClearAttendance}
       />
     </div>
+
+    // </div>
   );
 }
