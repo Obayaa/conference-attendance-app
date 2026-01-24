@@ -260,7 +260,7 @@ The system prevents duplicate attendance at multiple levels:
 | Element | Color | Usage |
 |---------|-------|-------|
 | Primary (Attendance) | Indigo/Blue | Main actions, active states |
-| Secondary (Admin) | Purple/Pink | Admin panel, analytics |
+| Secondary (Admin) | Purple/Indigo | Admin panel, analytics |
 | Success | Green | Confirmation, positive actions |
 | Error | Red | Warnings, errors, delete actions |
 | Neutral | Gray | Inactive states, borders |
