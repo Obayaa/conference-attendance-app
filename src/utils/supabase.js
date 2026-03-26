@@ -10,8 +10,158 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ============================================
-// MEMBERS FUNCTIONS
+// AUTH & PROFILE FUNCTIONS
 // ============================================
+
+/**
+ * Get the current logged-in user's profile (includes role)
+ */
+export async function getCurrentUserProfile() {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error) throw error;
+    return data; // { id, email, role, full_name, created_at }
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
+  }
+}
+
+/**
+ * Sign in with email and password
+ */
+export async function signIn(email, password) {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    const profile = await getCurrentUserProfile();
+    return { success: true, user: data.user, profile };
+  } catch (error) {
+    console.error("Sign in error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Sign out the current user
+ */
+export async function signOut() {
+  await supabase.auth.signOut();
+}
+
+// ============================================
+// SYSTEM USER MANAGEMENT (Admin only)
+// ============================================
+
+/**
+ * Get all system users from profiles table
+ */
+export async function getSystemUsers() {
+  try {
+    const { data, error } = await supabase.rpc("get_all_profiles");
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching system users:", error);
+    return [];
+  }
+}
+
+/**
+ * Create a new system user.
+ * Requires a Supabase Edge Function named "create-user" (uses service role key server-side).
+ * See SETUP.md for instructions.
+ */
+export async function createSystemUser({ email, password, full_name, role }) {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    console.log("Session:", session);
+    console.log("Token:", session?.access_token);
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: session?.access_token
+            ? `Bearer ${session.access_token}`
+            : "",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+        },
+        body: JSON.stringify({ email, password, full_name, role }),
+      },
+    );
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Request failed");
+    }
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    return { success: true, user: data.user };
+  } catch (error) {
+    console.error("Error creating system user:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Delete a system user (removes from auth + profiles).
+ * Requires a Supabase Edge Function named "delete-user".
+ */
+export async function deleteSystemUser(userId) {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+        },
+        body: JSON.stringify({ userId }),
+      },
+    );
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Request failed");
+    }
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting system user:", error);
+    return { success: false, message: error.message };
+  }
+}
 
 /**
  * Get all members from database
@@ -38,7 +188,6 @@ export async function searchMembers(query) {
   try {
     const q = query.toLowerCase().trim();
 
-    // Search across custid, name, and phone
     const { data, error } = await supabase
       .from("members")
       .select("*")
@@ -70,6 +219,24 @@ export async function importMembers(membersArray) {
     return { success: true, count: membersArray.length };
   } catch (error) {
     console.error("Error importing members:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Clear all members from the database
+ */
+export async function clearAllMembers() {
+  try {
+    const { error } = await supabase
+      .from("members")
+      .delete()
+      .gte("created_at", "1970-01-01"); // matches all rows
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error clearing members:", error);
     return { success: false, error: error.message };
   }
 }
@@ -118,7 +285,6 @@ export async function markAttendance(member, isProxy = false, proxyName = "") {
       .single();
 
     if (error) {
-      // Check if duplicate
       if (error.code === "23505") {
         return {
           success: false,
@@ -148,7 +314,7 @@ export async function checkAttendance(custid) {
       .single();
 
     if (error && error.code !== "PGRST116") throw error;
-    return data; // Returns null if not found
+    return data;
   } catch (error) {
     console.error("Error checking attendance:", error);
     return null;
@@ -163,7 +329,7 @@ export async function clearAllAttendance() {
     const { error } = await supabase
       .from("attendance")
       .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000"); // Delete all
+      .neq("id", "00000000-0000-0000-0000-000000000000");
 
     if (error) throw error;
     return { success: true };
@@ -188,28 +354,22 @@ export async function getAttendanceStats() {
     const totalAttended = attendance.length;
     const proxyCount = attendance.filter((a) => a.proxy).length;
 
-    // Overall gender breakdown
     const genderCounts = attendance.reduce((acc, a) => {
       const g = a.gender || "Unknown";
       acc[g] = (acc[g] || 0) + 1;
       return acc;
     }, {});
 
-    // Overall branch breakdown
     const branchCounts = attendance.reduce((acc, a) => {
       const b = a.branch || "Unknown";
       acc[b] = (acc[b] || 0) + 1;
       return acc;
     }, {});
 
-    // Branch-based gender breakdown
     const branchGenderBreakdown = attendance.reduce((acc, a) => {
       const branch = a.branch || "Unknown";
       const gender = a.gender || "Unknown";
-
-      if (!acc[branch]) {
-        acc[branch] = {};
-      }
+      if (!acc[branch]) acc[branch] = {};
       acc[branch][gender] = (acc[branch][gender] || 0) + 1;
       return acc;
     }, {});
@@ -244,9 +404,6 @@ export async function getAttendanceStats() {
 // REAL-TIME SUBSCRIPTIONS
 // ============================================
 
-/**
- * Subscribe to attendance changes in real-time
- */
 export function subscribeToAttendance(callback) {
   const channel = supabase
     .channel("attendance-changes")
@@ -257,12 +414,9 @@ export function subscribeToAttendance(callback) {
     )
     .subscribe();
 
-  return channel; // Return to unsubscribe later
+  return channel;
 }
 
-/**
- * Unsubscribe from real-time updates
- */
 export async function unsubscribeFromAttendance(channel) {
   if (channel) {
     await supabase.removeChannel(channel);
