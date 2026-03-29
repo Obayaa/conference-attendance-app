@@ -23,36 +23,37 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // In App.jsx
   useEffect(() => {
     let mounted = true;
 
-    async function init() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session && mounted) {
-        const profile = await getCurrentUserProfile();
-        setUserProfile(profile);
-      }
-
-      setLoading(false);
-    }
-
-    init();
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
       if (session) {
-        const profile = await getCurrentUserProfile();
-        setUserProfile(profile);
+        const user = session.user;
+        const metaRole = user.user_metadata?.role;
+        const metaName = user.user_metadata?.full_name;
+
+        if (metaRole) {
+          // Build profile from JWT — instant, no network call
+          setUserProfile({
+            id: user.id,
+            email: user.email,
+            full_name: metaName || null,
+            role: metaRole,
+          });
+        } else {
+          // Fallback — only if role missing from metadata
+          const profile = await getCurrentUserProfile();
+          if (mounted) setUserProfile(profile);
+        }
       } else {
         setUserProfile(null);
       }
+
+      if (mounted) setLoading(false);
     });
 
     return () => {
@@ -154,59 +155,28 @@ function AppContent() {
       )}
 
       <main className={isLoggedIn ? "p-4 md:p-10" : ""}>
-        <Routes>
-          {/* Login — redirect away if already logged in */}
-          <Route
-            path="/login"
-            element={
-              isLoggedIn ? (
-                <Navigate to={isAdmin ? "/admin" : "/attendance"} replace />
-              ) : (
-                <LoginPage onLoginSuccess={handleLoginSuccess} />
-              )
-            }
-          />
+        {!isLoggedIn ? (
+          <LoginPage onLoginSuccess={handleLoginSuccess} />
+        ) : (
+          <>
+            {/* Keep both mounted, just show/hide */}
+            <div
+              className={
+                location.pathname === "/attendance" ? "block" : "hidden"
+              }
+            >
+              <AttendancePage />
+            </div>
 
-          {/* Attendance — accessible by both roles */}
-          <Route
-            path="/attendance"
-            element={
-              isLoggedIn ? <AttendancePage /> : <Navigate to="/login" replace />
-            }
-          />
-
-          {/* Admin — admin only */}
-          <Route
-            path="/admin"
-            element={
-              isLoggedIn ? (
-                isAdmin ? (
-                  <AdminPage
-                    onLogout={handleLogout}
-                    userProfile={userProfile}
-                  />
-                ) : (
-                  <Navigate to="/attendance" replace />
-                )
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          {/* Default: redirect to login */}
-          <Route
-            path="*"
-            element={
-              <Navigate
-                to={
-                  isLoggedIn ? (isAdmin ? "/admin" : "/attendance") : "/login"
-                }
-                replace
-              />
-            }
-          />
-        </Routes>
+            {isAdmin && (
+              <div
+                className={location.pathname === "/admin" ? "block" : "hidden"}
+              >
+                <AdminPage onLogout={handleLogout} userProfile={userProfile} />
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   );

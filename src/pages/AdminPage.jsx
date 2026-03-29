@@ -478,7 +478,6 @@ import {
   TrendingUp,
   Download,
   Trash2,
-  LogOut,
   RefreshCw,
   Activity,
   Clock,
@@ -491,6 +490,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Database,
+  Pencil,
 } from "lucide-react";
 
 import {
@@ -503,6 +503,7 @@ import {
   getAllMembers,
   getSystemUsers,
   createSystemUser,
+  updateSystemUser,
   deleteSystemUser,
 } from "../utils/supabase";
 import { useEffect, useState, useRef } from "react";
@@ -520,16 +521,23 @@ function SystemUsersTab() {
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [message, setMessage] = useState({ text: "", type: "" });
 
-  // New user form state
   const [form, setForm] = useState({
     full_name: "",
     email: "",
     password: "",
     role: "operator",
   });
+  const [editForm, setEditForm] = useState({
+    full_name: "",
+    email: "",
+    role: "operator",
+    password: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -544,6 +552,22 @@ function SystemUsersTab() {
 
   function handleFormChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function handleEditFormChange(e) {
+    setEditForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function openEdit(user) {
+    setEditTarget(user);
+    setEditForm({
+      full_name: user.full_name || "",
+      email: user.email || "",
+      role: user.role || "operator",
+      password: "",
+    });
+    setShowEditPassword(false);
+    setMessage({ text: "", type: "" });
   }
 
   async function handleCreateUser(e) {
@@ -561,29 +585,73 @@ function SystemUsersTab() {
     }
 
     setSubmitting(true);
-    try {
-      const result = await createSystemUser(form);
-      if (result.success) {
-        // Clear form and close on success
-        setForm({ full_name: "", email: "", password: "", role: "operator" });
-        setShowForm(false);
-        await loadUsers();
-      } else {
-        setMessage({ text: result.message, type: "error" });
-      }
-    } catch (err) {
-      setMessage({ text: "An unexpected error occurred", type: "error" });
-    } finally {
-      setSubmitting(false); // ALWAYS reset this
+    setMessage({ text: "", type: "" });
+    const result = await createSystemUser(form);
+
+    if (result.success) {
+      setMessage({
+        text: `User "${form.full_name}" created successfully.`,
+        type: "success",
+      });
+      setForm({ full_name: "", email: "", password: "", role: "operator" });
+      setShowForm(false);
+      await loadUsers();
+    } else {
+      setMessage({
+        text: result.message || "Failed to create user.",
+        type: "error",
+      });
     }
+    setSubmitting(false);
+  }
+
+  async function handleUpdateUser(e) {
+    e.preventDefault();
+    if (!editForm.full_name.trim() || !editForm.email.trim()) {
+      setMessage({ text: "Name and email are required.", type: "error" });
+      return;
+    }
+    if (editForm.password && editForm.password.length < 6) {
+      setMessage({
+        text: "Password must be at least 6 characters.",
+        type: "error",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage({ text: "", type: "" });
+
+    const payload = {
+      userId: editTarget.id,
+      full_name: editForm.full_name,
+      email: editForm.email,
+      role: editForm.role,
+    };
+    if (editForm.password.trim()) payload.password = editForm.password;
+
+    const result = await updateSystemUser(payload);
+
+    if (result.success) {
+      setMessage({
+        text: `User "${editForm.full_name}" updated successfully.`,
+        type: "success",
+      });
+      setEditTarget(null);
+      await loadUsers();
+    } else {
+      setMessage({
+        text: result.message || "Failed to update user.",
+        type: "error",
+      });
+    }
+    setSubmitting(false);
   }
 
   async function handleDeleteUser() {
     if (!deleteTarget) return;
     setDeleting(true);
-
     const result = await deleteSystemUser(deleteTarget.id);
-
     if (result.success) {
       setMessage({
         text: `User "${deleteTarget.full_name || deleteTarget.email}" deleted.`,
@@ -596,14 +664,13 @@ function SystemUsersTab() {
         type: "error",
       });
     }
-
     setDeleting(false);
     setDeleteTarget(null);
   }
 
   return (
     <div>
-      {/* Header row */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <ShieldCheck className="w-6 h-6 text-purple-600" />
@@ -612,6 +679,7 @@ function SystemUsersTab() {
         <button
           onClick={() => {
             setShowForm((v) => !v);
+            setEditTarget(null);
             setMessage({ text: "", type: "" });
           }}
           className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition text-sm"
@@ -621,7 +689,7 @@ function SystemUsersTab() {
         </button>
       </div>
 
-      {/* Feedback message */}
+      {/* Feedback */}
       {message.text && (
         <div
           className={`mb-5 px-4 py-3 rounded-lg text-sm border ${
@@ -634,7 +702,7 @@ function SystemUsersTab() {
         </div>
       )}
 
-      {/* Create User Form */}
+      {/* Create Form */}
       {showForm && (
         <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-6">
           <h3 className="font-bold text-gray-800 mb-4">Create New User</h3>
@@ -651,10 +719,9 @@ function SystemUsersTab() {
                 value={form.full_name}
                 onChange={handleFormChange}
                 placeholder="e.g. John Mensah"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
-
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Email Address
@@ -665,10 +732,9 @@ function SystemUsersTab() {
                 value={form.email}
                 onChange={handleFormChange}
                 placeholder="user@example.com"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
-
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Password
@@ -680,7 +746,7 @@ function SystemUsersTab() {
                   value={form.password}
                   onChange={handleFormChange}
                   placeholder="Min. 6 characters"
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                 />
                 <button
                   type="button"
@@ -695,7 +761,6 @@ function SystemUsersTab() {
                 </button>
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Role
@@ -704,13 +769,12 @@ function SystemUsersTab() {
                 name="role"
                 value={form.role}
                 onChange={handleFormChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white"
               >
                 <option value="operator">Operator (Attendance only)</option>
                 <option value="admin">Admin (Full access)</option>
               </select>
             </div>
-
             <div className="md:col-span-2 flex gap-3 pt-1">
               <button
                 type="submit"
@@ -726,16 +790,107 @@ function SystemUsersTab() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setSubmitting(false); // Reset submitting state on cancel
-                  setForm({
-                    full_name: "",
-                    email: "",
-                    password: "",
-                    role: "operator",
-                  }); // Clear form
-                }}
+                onClick={() => setShowForm(false)}
+                className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Edit Form */}
+      {editTarget && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-6">
+          <h3 className="font-bold text-gray-800 mb-1">Edit User</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Leave password blank to keep it unchanged.
+          </p>
+          <form
+            onSubmit={handleUpdateUser}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                name="full_name"
+                value={editForm.full_name}
+                onChange={handleEditFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Email Address
+              </label>
+              <input
+                name="email"
+                type="email"
+                value={editForm.email}
+                onChange={handleEditFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                New Password{" "}
+                <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <div className="relative">
+                <input
+                  name="password"
+                  type={showEditPassword ? "text" : "password"}
+                  value={editForm.password}
+                  onChange={handleEditFormChange}
+                  placeholder="Leave blank to keep current"
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEditPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showEditPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Role
+              </label>
+              <select
+                name="role"
+                value={editForm.role}
+                onChange={handleEditFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+              >
+                <option value="operator">Operator (Attendance only)</option>
+                <option value="admin">Admin (Full access)</option>
+              </select>
+            </div>
+            <div className="md:col-span-2 flex gap-3 pt-1">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-60 text-sm"
+              >
+                {submitting ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <UserCheck className="w-4 h-4" />
+                )}
+                {submitting ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditTarget(null)}
                 className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
               >
                 Cancel
@@ -805,14 +960,26 @@ function SystemUsersTab() {
                       year: "numeric",
                     })}
                   </td>
-                  <td className="py-3 px-4 text-right">
-                    <button
-                      onClick={() => setDeleteTarget(user)}
-                      className="text-red-400 hover:text-red-600 transition"
-                      title="Delete user"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => {
+                          openEdit(user);
+                          setShowForm(false);
+                        }}
+                        className="text-indigo-400 hover:text-indigo-600 transition"
+                        title="Edit user"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(user)}
+                        className="text-red-400 hover:text-red-600 transition"
+                        title="Delete user"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -821,7 +988,6 @@ function SystemUsersTab() {
         </div>
       )}
 
-      {/* Delete confirmation */}
       <ConfirmModal
         open={!!deleteTarget}
         title="Delete System User"
@@ -1474,9 +1640,7 @@ export default function AdminPage({}) {
 
       {/* Tab content */}
       <div className="bg-white rounded-xl shadow-md p-6 md:p-8">
-        {activeTab === "dashboard" && (
-          <DashboardTab key="dashboard" />
-        )}
+        {activeTab === "dashboard" && <DashboardTab key="dashboard" />}
         {activeTab === "users" && <SystemUsersTab key="users" />}
       </div>
     </div>

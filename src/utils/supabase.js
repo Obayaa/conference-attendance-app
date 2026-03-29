@@ -19,11 +19,24 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export async function getCurrentUserProfile() {
   try {
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return null;
 
-    if (!user) return null;
+    const user = session.user;
+    const metaRole = user.user_metadata?.role;
+    const metaName = user.user_metadata?.full_name;
 
+    if (metaRole) {
+      return {
+        id: user.id,
+        email: user.email,
+        full_name: metaName || null,
+        role: metaRole,
+      };
+    }
+
+    // Only hits DB if metadata has no role
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -31,7 +44,7 @@ export async function getCurrentUserProfile() {
       .single();
 
     if (error) throw error;
-    return data; // { id, email, role, full_name, created_at }
+    return data;
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return null;
@@ -122,6 +135,50 @@ export async function createSystemUser({ email, password, full_name, role }) {
     return { success: true, user: data.user };
   } catch (error) {
     console.error("Error creating system user:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Update a system user's profile (full_name and role).
+ * Requires a Supabase Edge Function named "update-user".
+ */
+export async function updateSystemUser({
+  userId,
+  email,
+  full_name,
+  role,
+  password,
+}) {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const body = { userId };
+    if (email) body.email = email;
+    if (full_name) body.full_name = full_name;
+    if (role) body.role = role;
+    if (password) body.password = password;
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating system user:", error);
     return { success: false, message: error.message };
   }
 }
@@ -224,6 +281,25 @@ export async function importMembers(membersArray) {
 }
 
 /**
+ * Add a single member
+ */
+export async function addMember(member) {
+  try {
+    const { data, error } = await supabase
+      .from("members")
+      .insert([member])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error adding member:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
  * Clear all members from the database
  */
 export async function clearAllMembers() {
@@ -311,7 +387,7 @@ export async function checkAttendance(custid) {
       .from("attendance")
       .select("*")
       .eq("custid", custid)
-      .single();
+      .maybeSingle();
 
     if (error && error.code !== "PGRST116") throw error;
     return data;
@@ -422,3 +498,5 @@ export async function unsubscribeFromAttendance(channel) {
     await supabase.removeChannel(channel);
   }
 }
+
+
