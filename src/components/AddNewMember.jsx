@@ -2,6 +2,7 @@
 // FILE: src/components/AddNewMember.jsx
 // ============================================
 
+import React from "react";
 import { useState } from "react";
 import { X, UserPlus } from "lucide-react";
 import { addMember, markAttendance, checkAttendance } from "../utils/supabase";
