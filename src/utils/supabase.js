@@ -265,15 +265,22 @@ export async function searchMembers(query) {
  */
 export async function importMembers(membersArray) {
   try {
+    // Deduplicate within the file itself — keep last occurrence of each custid
+    const seen = new Map();
+    for (const member of membersArray) {
+      seen.set(member.custid, member);
+    }
+    const deduplicated = Array.from(seen.values());
+
     const { data, error } = await supabase
       .from("members")
-      .upsert(membersArray, {
+      .upsert(deduplicated, {
         onConflict: "custid",
         ignoreDuplicates: false,
       });
 
     if (error) throw error;
-    return { success: true, count: membersArray.length };
+    return { success: true, count: deduplicated.length };
   } catch (error) {
     console.error("Error importing members:", error);
     return { success: false, error: error.message };

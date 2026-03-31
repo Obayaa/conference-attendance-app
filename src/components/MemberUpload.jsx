@@ -15,6 +15,7 @@ export default function MemberUpload({ onClose, onSuccess }) {
   const [preview, setPreview] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [skippedRows, setSkippedRows] = useState([]);
 
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files[0];
@@ -47,35 +48,39 @@ export default function MemberUpload({ onClose, onSuccess }) {
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
           // Validate and normalize data
-          const normalized = jsonData.map((row, index) => {
-            // Handle different column name variations
+          const normalized = [];
+          const skipped = [];
+
+          jsonData.forEach((row, index) => {
             const custid =
               row.custid ||
               row.CUSTID ||
               row["Customer ID"] ||
               row.id ||
               row.ID;
+
+            if (!custid) {
+              skipped.push(index + 2); // +2 because row 1 is header
+              return; // skip this row, continue
+            }
+
             const name = row.name || row.NAME || row.Name || row["Full Name"];
             const phone =
               row.phone || row.PHONE || row.Phone || row["Phone Number"];
             const branch = row.branch || row.BRANCH || row.Branch;
             const gender = row.gender || row.GENDER || row.Gender;
 
-            if (!custid || !name || !phone || !branch || !gender) {
-              throw new Error(
-                `Row ${index + 2} is missing required fields. Required: custid, name, phone, branch, gender`,
-              );
-            }
-
-            return {
+            normalized.push({
               custid: String(custid).trim(),
-              name: String(name).trim(),
-              phone: String(phone).trim(),
-              branch: String(branch).trim(),
-              gender: String(gender).trim(),
-            };
+              name: name ? String(name).trim() : "",
+              phone: phone ? String(phone).trim() : "",
+              branch: branch ? String(branch).trim() : "",
+              gender: gender ? String(gender).trim() : "",
+            });
           });
 
+          // Attach skipped info to the result
+          normalized._skipped = skipped;
           resolve(normalized);
         } catch (err) {
           reject(err);
@@ -93,17 +98,24 @@ export default function MemberUpload({ onClose, onSuccess }) {
     setLoading(true);
     setError("");
     setSuccess("");
+    setSkippedRows([]);
 
     try {
       const data = await parseFile(file);
+      const skipped = data._skipped || [];
+
       const result = await importMembers(data);
 
       if (result.success) {
         setSuccess(`Successfully imported ${result.count} members!`);
-        setTimeout(() => {
-          if (onSuccess) onSuccess();
-          onClose();
-        }, 2000);
+        if (skipped.length > 0) {
+          setSkippedRows(skipped);
+        } else {
+          setTimeout(() => {
+            if (onSuccess) onSuccess();
+            onClose();
+          }, 2000);
+        }
       } else {
         setError(result.error || "Failed to import members");
       }
@@ -243,6 +255,40 @@ export default function MemberUpload({ onClose, onSuccess }) {
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <p className="text-green-800">{success}</p>
+            </div>
+          )}
+
+          {skippedRows.length > 0 && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3 mb-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-amber-800 font-semibold">
+                    {skippedRows.length} row{skippedRows.length > 1 ? "s" : ""}{" "}
+                    skipped — missing Customer ID
+                  </p>
+                  <p className="text-amber-700 text-sm mt-1">
+                    Fix these rows in your Excel file and re-upload if needed.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-white border border-amber-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                <p className="text-sm text-amber-800">
+                  <span className="font-semibold">Row numbers: </span>
+                  {skippedRows.join(", ")}
+                </p>
+              </div>
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={() => {
+                    if (onSuccess) onSuccess();
+                    onClose();
+                  }}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-700 transition"
+                >
+                  Close Anyway
+                </button>
+              </div>
             </div>
           )}
 
