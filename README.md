@@ -30,23 +30,27 @@ The Attendance System is a production-ready web application that streamlines the
 ### Technology Stack
 
 **Frontend:**
+
 - React 18.x
 - React Router DOM (for routing)
 - Tailwind CSS (for styling)
 - Lucide React (for icons)
 
 **Backend:**
+
 - Supabase (PostgreSQL database)
 - Supabase Authentication
 - Supabase Real-time subscriptions
 
 **Deployment:**
+
 - Netlify / Vercel (recommended)
 - Any static hosting platform
 
 ### Database Schema
 
 #### Members Table
+
 ```sql
 CREATE TABLE members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -60,6 +64,7 @@ CREATE TABLE members (
 ```
 
 #### Attendance Table
+
 ```sql
 CREATE TABLE attendance (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -88,12 +93,14 @@ CREATE TABLE attendance (
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd attendance-system
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -104,8 +111,9 @@ CREATE TABLE attendance (
    - Create an admin user in Authentication → Users
 
 4. **Configure environment variables**
-   
+
    Create a `.env` file in the project root:
+
    ```env
    VITE_SUPABASE_URL=https://your-project.supabase.co
    VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-anon-key-here
@@ -116,6 +124,7 @@ CREATE TABLE attendance (
    - Import via Supabase Table Editor → members → Insert → Import from CSV
 
 6. **Start development server**
+
    ```bash
    npm run dev
    ```
@@ -172,18 +181,21 @@ CREATE TABLE attendance (
 ## 🔐 Security Features
 
 ### Authentication
+
 - Admin access protected by Supabase Authentication
 - URL-based admin access (`/admin` route)
 - Session persistence across page refreshes
 - Automatic logout on session expiry
 
 ### Data Protection
+
 - Row Level Security (RLS) policies enabled
 - Authenticated users only can modify data
 - SQL injection prevention via Supabase client
 - Environment variables for sensitive credentials
 
 ### Best Practices Implemented
+
 - ✅ No hardcoded credentials
 - ✅ HTTPS only in production
 - ✅ Secure password hashing (handled by Supabase)
@@ -203,11 +215,13 @@ The search functionality prioritizes results intelligently:
 3. **Phone number matches**
 
 All searches use "starts with" logic for better accuracy:
+
 - Typing "CU" shows all Customer IDs starting with "CU"
 - Typing "John" shows names starting with "John", not containing "John"
 - Typing "024" shows phone numbers starting with "024"
 
 **Performance optimizations:**
+
 - Debounced search (300ms delay)
 - Database indexes on searchable fields
 - Limit 20 results per query
@@ -220,15 +234,17 @@ All connected devices receive updates instantly using Supabase Real-time:
 ```javascript
 // Subscribe to attendance changes
 const channel = supabase
-  .channel('attendance-changes')
-  .on('postgres_changes', 
-    { event: '*', schema: 'public', table: 'attendance' },
-    callback
+  .channel("attendance-changes")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "attendance" },
+    callback,
   )
   .subscribe();
 ```
 
 **Benefits:**
+
 - Multiple registration desks stay synchronized
 - Admin dashboard updates live
 - No manual refresh needed
@@ -257,13 +273,13 @@ The system prevents duplicate attendance at multiple levels:
 
 ### Color Palette
 
-| Element | Color | Usage |
-|---------|-------|-------|
-| Primary (Attendance) | Indigo/Blue | Main actions, active states |
-| Secondary (Admin) | Purple/Indigo | Admin panel, analytics |
-| Success | Green | Confirmation, positive actions |
-| Error | Red | Warnings, errors, delete actions |
-| Neutral | Gray | Inactive states, borders |
+| Element              | Color         | Usage                            |
+| -------------------- | ------------- | -------------------------------- |
+| Primary (Attendance) | Indigo/Blue   | Main actions, active states      |
+| Secondary (Admin)    | Purple/Indigo | Admin panel, analytics           |
+| Success              | Green         | Confirmation, positive actions   |
+| Error                | Red           | Warnings, errors, delete actions |
+| Neutral              | Gray          | Inactive states, borders         |
 
 ### Responsive Breakpoints
 
@@ -280,7 +296,7 @@ The system prevents duplicate attendance at multiple levels:
 - **Indexes** on frequently queried columns (custid, name, phone)
 - **Connection pooling** via Supabase
 - **Query optimization** with specific field selection
-- **Pagination** for large datasets
+- **Pagination** for large datasets — ensure Supabase Max Rows (Settings → API) is set above your member count
 
 ### Frontend Optimizations
 
@@ -292,12 +308,14 @@ The system prevents duplicate attendance at multiple levels:
 ### Scalability
 
 The system is designed to handle:
+
 - ✅ 20,000+ members in database
 - ✅ 100+ concurrent users
 - ✅ 10,000+ attendance records per event
 - ✅ Real-time updates across all devices
 
 **Free tier limits (Supabase):**
+
 - 500MB database storage (~50,000 members)
 - 50,000 monthly active users
 - Unlimited API requests
@@ -309,10 +327,10 @@ The system is designed to handle:
 
 ### Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_SUPABASE_URL` | Your Supabase project URL | `https://xxx.supabase.co` |
-| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase anonymous key | `eyJhbGc...` |
+| Variable                                | Description               | Example                   |
+| --------------------------------------- | ------------------------- | ------------------------- |
+| `VITE_SUPABASE_URL`                     | Your Supabase project URL | `https://xxx.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase anonymous key    | `eyJhbGc...`              |
 
 ### Customization Options
 
@@ -325,12 +343,17 @@ Can be extended by modifying data import
 
 **Search Limit:**
 Change in `supabase.js`:
+
 ```javascript
 .limit(20) // Change this number
 ```
 
 **Session Timeout:**
 Configured in Supabase dashboard → Authentication → Settings
+
+**Max Rows (Supabase Dashboard):**
+Go to Settings → API → Max Rows. Default is 1000. Increase this to match your dataset size,
+otherwise member fetching and stats will be silently capped.
 
 ---
 
@@ -365,6 +388,7 @@ Generates optimized static files in `/dist` folder.
 ### Deploy to Vercel
 
 Similar process:
+
 - Build command: `npm run build`
 - Output directory: `dist`
 - Add environment variables
@@ -387,29 +411,39 @@ For events with multiple registration desks:
 ### Common Issues
 
 **Issue: "Failed to resolve import @supabase/supabase-js"**
+
 ```bash
 # Solution:
 npm install @supabase/supabase-js
 ```
 
 **Issue: Search not working**
+
 - ✅ Check members are imported in Supabase
 - ✅ Verify API keys in `.env`
 - ✅ Check browser console for errors
 
 **Issue: Duplicate attendance not blocked**
+
 - ✅ Verify UNIQUE constraint on attendance table
 - ✅ Check Row Level Security policies
 
 **Issue: Real-time updates not working**
+
 - ✅ Verify internet connection
 - ✅ Check Supabase Real-time is enabled
 - ✅ Refresh the page
 
 **Issue: Admin login fails**
+
 - ✅ Verify admin user exists in Supabase Auth
 - ✅ Check email/password are correct
 - ✅ Ensure user is confirmed (not pending)
+
+**Issue: Member count stuck at 1000**
+
+- ✅ Go to Supabase Dashboard → Settings → API → Max Rows → increase to 5000 or higher
+- ✅ This is a server-side hard cap that overrides all query limits
 
 ---
 
@@ -420,40 +454,51 @@ npm install @supabase/supabase-js
 Located in `src/utils/supabase.js`
 
 #### `searchMembers(query)`
+
 Search for members by customer ID, name, or phone.
 
 **Parameters:**
+
 - `query` (string) - Search term
 
 **Returns:**
+
 - Array of matching member objects
 
 **Example:**
+
 ```javascript
 const results = await searchMembers("John");
 ```
 
 #### `markAttendance(member, isProxy, proxyName)`
+
 Mark attendance for a member.
 
 **Parameters:**
+
 - `member` (object) - Member object
 - `isProxy` (boolean) - Whether attending as proxy
 - `proxyName` (string) - Name of proxy person
 
 **Returns:**
+
 - `{ success: boolean, data?: object, message?: string }`
 
 #### `getAttendance()`
+
 Fetch all attendance records.
 
 **Returns:**
+
 - Array of attendance records
 
 #### `getAttendanceStats()`
+
 Get aggregated statistics.
 
 **Returns:**
+
 - Object with stats (totalMembers, totalAttended, etc.)
 
 ---
@@ -477,6 +522,7 @@ Get aggregated statistics.
 ### Testing Checklist
 
 Before deploying:
+
 - ✅ Test search with various inputs
 - ✅ Test duplicate prevention
 - ✅ Test proxy attendance
@@ -507,6 +553,7 @@ Planned features for future versions:
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [React](https://react.dev/)
 - [Supabase](https://supabase.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
