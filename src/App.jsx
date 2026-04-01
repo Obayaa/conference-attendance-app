@@ -155,28 +155,42 @@ function AppContent() {
       )}
 
       <main className={isLoggedIn ? "p-4 md:p-10" : ""}>
-        {!isLoggedIn ? (
-          <LoginPage onLoginSuccess={handleLoginSuccess} />
-        ) : (
-          <>
-            {/* Keep both mounted, just show/hide */}
-            <div
-              className={
-                location.pathname === "/attendance" ? "block" : "hidden"
-              }
-            >
-              <AttendancePage />
-            </div>
+        <Routes>
+          {!isLoggedIn ? (
+            <>
+              <Route
+                path="*"
+                element={<LoginPage onLoginSuccess={handleLoginSuccess} />}
+              />
+            </>
+          ) : (
+            <>
+              <Route
+                path="/"
+                element={
+                  <Navigate to={isAdmin ? "/admin" : "/attendance"} replace />
+                }
+              />
 
-            {isAdmin && (
-              <div
-                className={location.pathname === "/admin" ? "block" : "hidden"}
-              >
-                <AdminPage onLogout={handleLogout} userProfile={userProfile} />
-              </div>
-            )}
-          </>
-        )}
+              <Route path="/attendance" element={<AttendancePage />} />
+
+              {isAdmin && (
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminPage
+                      onLogout={handleLogout}
+                      userProfile={userProfile}
+                    />
+                  }
+                />
+              )}
+
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
+        </Routes>
       </main>
     </div>
   );

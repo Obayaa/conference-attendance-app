@@ -228,7 +228,8 @@ export async function getAllMembers() {
     const { data, error } = await supabase
       .from("members")
       .select("*")
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .range(0, 9999); // limit to 10k for safety
 
     if (error) throw error;
     return data || [];
@@ -265,22 +266,50 @@ export async function searchMembers(query) {
  */
 export async function importMembers(membersArray) {
   try {
-    // Deduplicate within the file itself — keep last occurrence of each custid
+    // Step 1: Deduplicate within file
     const seen = new Map();
     for (const member of membersArray) {
       seen.set(member.custid, member);
     }
     const deduplicated = Array.from(seen.values());
 
-    const { data, error } = await supabase
+    // Step 2: Get existing custids from DB
+    const custids = deduplicated.map((m) => m.custid);
+
+    const { data: existingRecords, error: fetchError } = await supabase
       .from("members")
-      .upsert(deduplicated, {
-        onConflict: "custid",
-        ignoreDuplicates: false,
-      });
+      .select("custid")
+      .in("custid", custids);
+
+    if (fetchError) throw fetchError;
+
+    const existingSet = new Set(existingRecords.map((r) => r.custid));
+
+    // Step 3: Split data
+    const newMembers = [];
+    const updatedMembers = [];
+
+    for (const member of deduplicated) {
+      if (existingSet.has(member.custid)) {
+        updatedMembers.push(member);
+      } else {
+        newMembers.push(member);
+      }
+    }
+
+    // Step 4: Upsert everything (same as before)
+    const { error } = await supabase.from("members").upsert(deduplicated, {
+      onConflict: "custid",
+    });
 
     if (error) throw error;
-    return { success: true, count: deduplicated.length };
+
+    return {
+      success: true,
+      total: deduplicated.length,
+      newCount: newMembers.length,
+      updatedCount: updatedMembers.length,
+    };
   } catch (error) {
     console.error("Error importing members:", error);
     return { success: false, error: error.message };
@@ -427,13 +456,13 @@ export async function clearAllAttendance() {
  */
 export async function getAttendanceStats() {
   try {
-    const [attendanceResult, membersResult] = await Promise.all([
+    const [attendanceResult, { count: totalMembers }] = await Promise.all([
       supabase.from("attendance").select("*", { count: "exact", head: false }),
       supabase.from("members").select("*", { count: "exact", head: true }),
     ]);
 
     const attendance = attendanceResult.data || [];
-    const totalMembers = membersResult.count || 0;
+    // const totalMembers = membersResult.count || 0;
     const totalAttended = attendance.length;
     const proxyCount = attendance.filter((a) => a.proxy).length;
 
@@ -505,5 +534,3 @@ export async function unsubscribeFromAttendance(channel) {
     await supabase.removeChannel(channel);
   }
 }
-
-

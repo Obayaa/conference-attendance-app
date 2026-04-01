@@ -23,12 +23,18 @@ export default function MemberUpload({ onClose, onSuccess }) {
 
     setError("");
     setSuccess("");
+    setSkippedRows([]);
     setFile(selectedFile);
 
-    // Preview the file
     try {
       const data = await parseFile(selectedFile);
-      setPreview(data.slice(0, 5)); // Show first 5 rows
+      const skipped = data._skipped || [];
+      setPreview(data.slice(0, 10));
+
+      // Show skipped row warnings immediately on file select
+      if (skipped.length > 0) {
+        setSkippedRows(skipped);
+      }
     } catch (err) {
       setError("Failed to read file: " + err.message);
       setFile(null);
@@ -94,28 +100,24 @@ export default function MemberUpload({ onClose, onSuccess }) {
 
   const handleUpload = async () => {
     if (!file) return;
-
     setLoading(true);
     setError("");
     setSuccess("");
-    setSkippedRows([]);
+    // setSkippedRows([]);
 
     try {
       const data = await parseFile(file);
-      const skipped = data._skipped || [];
-
       const result = await importMembers(data);
 
       if (result.success) {
-        setSuccess(`Successfully imported ${result.count} members!`);
-        if (skipped.length > 0) {
-          setSkippedRows(skipped);
-        } else {
-          setTimeout(() => {
-            if (onSuccess) onSuccess();
-            onClose();
-          }, 2000);
-        }
+        setSuccess(
+          `Import complete: ${result.newCount} new, ${result.updatedCount} updated.`,
+        );
+        // Only auto-close if no skipped rows were flagged
+        setTimeout(() => {
+          if (onSuccess) onSuccess();
+          onClose();
+        }, 1000);
       } else {
         setError(result.error || "Failed to import members");
       }
@@ -278,7 +280,7 @@ export default function MemberUpload({ onClose, onSuccess }) {
                   {skippedRows.join(", ")}
                 </p>
               </div>
-              <div className="flex justify-end mt-3">
+              {/* <div className="flex justify-end mt-3">
                 <button
                   onClick={() => {
                     if (onSuccess) onSuccess();
@@ -288,37 +290,39 @@ export default function MemberUpload({ onClose, onSuccess }) {
                 >
                   Close Anyway
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 justify-end">
-            <button
-              onClick={onClose}
-              disabled={loading}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleUpload}
-              disabled={!file || loading}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4" />
-                  Import Members
-                </>
-              )}
-            </button>
-          </div>
+          {!success && (
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={onClose}
+                disabled={loading}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpload}
+                disabled={!file || loading}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Import Members
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
