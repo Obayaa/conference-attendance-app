@@ -58,23 +58,29 @@ export default function MemberUpload({ onClose, onSuccess }) {
           const skipped = [];
 
           jsonData.forEach((row, index) => {
+            // Normalize all keys to lowercase
+            const normalized_row = Object.fromEntries(
+              Object.entries(row).map(([k, v]) => [k.toLowerCase().trim(), v]),
+            );
+
             const custid =
-              row.custid ||
-              row.CUSTID ||
-              row["Customer ID"] ||
-              row.id ||
-              row.ID;
+              normalized_row.custid ||
+              normalized_row["customer id"] ||
+              normalized_row["cust id"] ||
+              normalized_row.id;
 
             if (!custid) {
               skipped.push(index + 2); // +2 because row 1 is header
               return; // skip this row, continue
             }
 
-            const name = row.name || row.NAME || row.Name || row["Full Name"];
+            const name = normalized_row.name || normalized_row["full name"];
             const phone =
-              row.phone || row.PHONE || row.Phone || row["Phone Number"];
-            const branch = row.branch || row.BRANCH || row.Branch;
-            const gender = row.gender || row.GENDER || row.Gender;
+              normalized_row.phone ||
+              normalized_row["phone number"] ||
+              normalized_row["phone no"];
+            const branch = normalized_row.branch;
+            const gender = normalized_row.gender;
 
             normalized.push({
               custid: String(custid).trim(),
@@ -280,17 +286,6 @@ export default function MemberUpload({ onClose, onSuccess }) {
                   {skippedRows.join(", ")}
                 </p>
               </div>
-              {/* <div className="flex justify-end mt-3">
-                <button
-                  onClick={() => {
-                    if (onSuccess) onSuccess();
-                    onClose();
-                  }}
-                  className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-700 transition"
-                >
-                  Close Anyway
-                </button>
-              </div> */}
             </div>
           )}
 
