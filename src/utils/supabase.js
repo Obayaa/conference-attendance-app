@@ -758,7 +758,7 @@ export async function getAllMembers() {
       .from("members")
       .select("*")
       .order("name", { ascending: true })
-      .range(0, 9999);
+      .range(0, 99999); // limit to 100k for safety
 
     if (error) throw error;
     return data || [];
