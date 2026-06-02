@@ -739,7 +739,9 @@ function DashboardTab({}) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-lg">
           <Users className="w-5 h-5 mb-2 opacity-80" />
-          <div className="text-3xl font-bold mb-0.5">{totalMembers}</div>
+          <div className="text-3xl font-bold mb-0.5">
+            {totalMembers.toLocaleString()}
+          </div>
           <div className="text-blue-100 text-sm">Total Registered</div>
         </div>
         <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-5 text-white shadow-lg">
@@ -884,7 +886,7 @@ function DashboardTab({}) {
           className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           <Database className="w-4 h-4" />
-          Clear Members DB ({totalMembers})
+          Clear Members DB ({totalMembers.toLocaleString()})
         </button>
       </div>
 
@@ -1118,7 +1120,7 @@ function DashboardTab({}) {
       <ConfirmModal
         open={showClearMembersModal}
         title="Clear Members Database"
-        message={`This will permanently delete all ${totalMembers} member records AND all attendance records linked to them. This action cannot be undone.`}
+        message={`This will permanently delete all ${totalMembers.toLocaleString()} member records AND all attendance records linked to them. This action cannot be undone.`}
         confirmText="Yes, Clear Members"
         loading={loading}
         onCancel={() => setShowClearMembersModal(false)}
