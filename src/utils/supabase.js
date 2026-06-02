@@ -752,19 +752,19 @@ export async function deleteSystemUser(userId) {
 // MEMBER FUNCTIONS
 // ============================================
 
-export async function getAllMembers() {
+export async function getAllMembersCount() {
   try {
-    const { data, error } = await supabase
+    const { count, error } = await supabase
       .from("members")
-      .select("*")
-      .order("name", { ascending: true })
-      .range(0, 99999); // limit to 100k for safety
+      .select("*", { count: "exact", head: true });
+
+    console.log("Count result:", count, "Error:", error); // debug
 
     if (error) throw error;
-    return data || [];
+    return count ?? 0;
   } catch (error) {
-    console.error("Error fetching members:", error);
-    return [];
+    console.error("Error fetching member count:", error);
+    return 0;
   }
 }
 

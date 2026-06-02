@@ -501,6 +501,10 @@ Get aggregated statistics.
 
 - Object with stats (totalMembers, totalAttended, etc.)
 
+#### `getAllMembersCount()`
+
+Get Total Statistics on Mmebers
+
 ---
 
 ## 🤝 Contributing
